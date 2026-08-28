@@ -1,0 +1,28 @@
+name: Build Mac Installer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Java 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Baixar certificado da Full Throttle
+        run: curl -o digital-certificate.txt "https://fullthrottle.app.br/api/qz_certificate.php"
+
+      - name: Compilar instalador Mac
+        run: ant pkgbuild -Dauthcert.use="digital-certificate.txt" -Djavac.source=11 -Djavac.target=11 -Djavafx.rev=11.0.2
+
+      - name: Publicar instalador
+        uses: actions/upload-artifact@v4
+        with:
+          name: qz-tray-mac
+          path: out/*.pkg
